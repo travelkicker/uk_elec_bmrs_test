@@ -1,6 +1,7 @@
 
-
 """
+BRMS API format
+
 #   BMRS B1770 – Imbalance Prices
 https://api.bmreports.com/BMRS/B1770/V1?APIKey=<
 APIKey>&SettlementDate=<SettlementDate>&Period=<Period>&ServiceType=<xml/csv>
@@ -15,23 +16,28 @@ import requests
 import pandas as pd
 from datetime import datetime
 
+# personal API request key applied from website bmreports.com
 BMRS_APIKey = 'k0tiv5vqkpgptxa'
 
+# set request data settlement date as current date
 Settlement_Date = datetime.now().strftime('%Y-%m-%d')
 
+# request all periods data for the given settlement date
 Settlement_Period = '*'
 
+# set API request link
 url_B1770 = f'https://api.bmreports.com/BMRS/B1770/V1?APIKey={BMRS_APIKey}&SettlementDate={Settlement_Date}&Period={Settlement_Period}&ServiceType=xml'
 url_B1780 = f'https://api.bmreports.com/BMRS/B1780/V1?APIKey={BMRS_APIKey}&SettlementDate={Settlement_Date}&Period={Settlement_Period}&ServiceType=xml'
 
+# initial dataframes to hold response data
 df_B1770 = pd.DataFrame()
 df_B1780 = pd.DataFrame()
 
 try:
-    # request B1780 data from website
+    # send get request for B1780 data from website, with timeout as 10 seconds
     response_B1780 = requests.get(url_B1780,timeout=10)
     
-    # extract data from xml response and save to dataframe
+    # extract data from xml response and save to dataframe, may need to change xpath if format changes from response
     df_B1780 = pd.read_xml(response_B1780.content, xpath=".//item")
 
     response_B1770 = requests.get(url_B1770,timeout=10)
@@ -41,10 +47,10 @@ except Exception as e:
     print (e)
     print ('request failed')
     
-# do calculation if both dataframe have records    
+# do calculation if both dataframe have records, may need to change column names according to response
 if df_B1780.shape[0]>0 and df_B1770.shape[0]>0:
     try:  
-        # add merge column on df_B1770 to match df_B1780
+        # add merge column on df_B1770 to match df_B1780 for merging two dataframe
         df_B1770['imbalanceQuantityDirection'] = ['SURPLUS' if x =='Excess balance' else 'DEFICIT' for x in df_B1770['priceCategory']]
         
         # merge df_B1770 and df_B1780 for calculation
