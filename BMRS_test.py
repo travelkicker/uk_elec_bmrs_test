@@ -1,26 +1,13 @@
-
-"""
-BRMS API format
-
-#   BMRS B1770 – Imbalance Prices
-https://api.bmreports.com/BMRS/B1770/V1?APIKey=<
-APIKey>&SettlementDate=<SettlementDate>&Period=<Period>&ServiceType=<xml/csv>
-
-#   BMRS B1780 – Aggregated Imbalance Volumes
-https://api.bmreports.com/BMRS/B1780/<VersionNo>?APIKey=<APIKey>&SettlementDate=<SettlementDate>&
-Period=<Period>&ServiceType=<xml/csv>
-"""
-
-
 import requests
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # personal API request key applied from website bmreports.com
 BMRS_APIKey = 'k0tiv5vqkpgptxa'
 
-# set request data settlement date as current date
-Settlement_Date = datetime.now().strftime('%Y-%m-%d')
+# set request data settlement date as previous date
+Previous_Date = datetime.today() - timedelta(days=1)
+Settlement_Date = Previous_Date.strftime('%Y-%m-%d')
 
 # request all periods data for the given settlement date
 Settlement_Period = '*'
